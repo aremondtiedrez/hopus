@@ -23,6 +23,8 @@ def preprocess(data: pd.DataFrame) -> None:
     1. Remove listings that are not single-family homes.
     """
     _focus_in_single_family_homes(data)
+    _drop_listings_with_missing_sizes(data)
+    _reset_index_after_dropping_rows(data)
 
 
 def _focus_in_single_family_homes(data: pd.DataFrame) -> None:
@@ -37,3 +39,22 @@ def _focus_in_single_family_homes(data: pd.DataFrame) -> None:
     """
     data.drop(data[data["propertyType"] != "Single Family"].index, inplace=True)
     del data["propertyType"]
+
+
+def _drop_listings_with_missing_sizes(data: pd.DataFrame) -> None:
+    """
+    Remove listings whose `squareFootage` or `lotSize` entry is missing.
+
+    This is done in-place.
+    """
+    data.dropna(subset=["squareFootage", "lotSize"], how="any", inplace=True)
+
+
+def _reset_index_after_dropping_rows(data: pd.DataFrame) -> None:
+    """
+    We reset, in-place, the index of the `data` `DataFrame`.
+    This is convenient to do after dropping rows from the `DataFrame`
+    since it removes any gaps in the indexing of the `DataFrame`.
+    """
+    data.reset_index(inplace=True)
+    del data["index"]
