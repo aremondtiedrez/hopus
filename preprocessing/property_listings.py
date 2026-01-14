@@ -30,6 +30,8 @@ def preprocess(data: pd.DataFrame) -> pd.DataFrame:
        (as they are not single-family homes).
     7. [Once again] Reset the indexing, so that there are no gaps in indexing
        after rows have been dropped.
+    8. For each numeric column that will be used as a prediction feature,
+       replace the missing values with zeroes.
 
     Once all the steps are carried out, the modified `data` `DataFrame` is returned.
     """
@@ -40,6 +42,7 @@ def preprocess(data: pd.DataFrame) -> pd.DataFrame:
     data = _expand_features(data)
     _remove_listings_with_high_unit_count(data)
     _reset_index_after_dropping_rows(data)
+    _fill_missing_numeric_values_with_zeroes(data)
     return data
 
 
@@ -125,3 +128,27 @@ def _remove_listings_with_high_unit_count(data: pd.DataFrame) -> None:
     This is done in-place.
     """
     data.drop(data[data["features_unitCount"] > 1].index, inplace=True)
+
+
+def _fill_missing_numeric_values_with_zeroes(
+    data: pd.DataFrame, numeric_columns=None
+) -> None:
+    """
+    Some numeric columns, which will be used as prediction features, are missing values.
+    This function replaces the missing values with zeroes.
+
+    For each such `column`, a sentinel column `column_nan` is created to indicate
+    that, in the transformed `column`, the zero value comes from a missing value.
+
+    This is done in-place.
+    """
+    if numeric_columns is None:
+        numeric_columns = [
+            "bedrooms",
+            "bathrooms",
+            "features_floorCount",
+            "features_garageSpace",
+            "features_roomCount",
+        ]
+    data[[column + "_nan" for column in numeric_columns]] = data[numeric_columns].isna()
+    data.fillna(value={column: 0 for column in numeric_columns}, inplace=True)
