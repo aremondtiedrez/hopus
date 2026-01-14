@@ -11,3 +11,4 @@ More specifically, this module expects data to come from two sources.
 """
 
 from . import home_price_index
+from . import property_listings

@@ -13,7 +13,7 @@ def load(path: str = "data/CSUSHPINSA.csv") -> pd.DataFrame:
     return pd.read_csv(path)
 
 
-def preprocess(data: pd.DataFrame) -> pd.DataFrame:
+def preprocess(data: pd.DataFrame) -> None:
     """
     Pre-process the home price index data.
 
@@ -27,6 +27,8 @@ def preprocess(data: pd.DataFrame) -> pd.DataFrame:
     4. Combine the `availableValue` and a seasonal adjustment to make a prediction
        for the home price index value.
        See the documentation in `_compute_seasonal_adjustment` for details.
+
+    All these steps happen in-place.
     """
     _rename_columns(data)
     _convert_date_type(data)
