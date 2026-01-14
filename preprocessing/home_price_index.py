@@ -83,5 +83,5 @@ def _add_three_month_lagged_value(data: pd.DataFrame):
 
     These operations is carried out in-place.
     """
-    data["availableValue"] = data["trueValue"].shirt(3)
+    data["availableValue"] = data["trueValue"].shift(3)
     data.dropna(how="any", inplace=True)
