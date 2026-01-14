@@ -99,7 +99,10 @@ def _expand_features(data: pd.DataFrame) -> pd.DataFrame:
 
     Once all of this is done, the updated `data` `DataFrame` is returned.
     """
+    # `pd.get_dummies` automatically detects which columns contain numeric data and
+    # it leaves these columns unmodified.
     features = pd.get_dummies(pd.json_normalize(data["features"]), dummy_na=True)
+    # Remove non-alphanumeric characters from the resulting column names
     features.columns = features.columns.str.replace(r"\W", "", regex=True)
     features = features.add_prefix("features_")
     data = pd.concat([data, features], axis=1)
