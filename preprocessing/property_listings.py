@@ -26,6 +26,10 @@ def preprocess(data: pd.DataFrame) -> pd.DataFrame:
        after rows have been dropped.
     4. Rename the columns.
     5. Expand the `features` columns, one-hot encoding the results.
+    6. Remove the listings whose `features_unitCount` is greater than 1
+       (as they are not single-family homes).
+    7. [Once again] Reset the indexing, so that there are no gaps in indexing
+       after rows have been dropped.
 
     Once all the steps are carried out, the modified `data` `DataFrame` is returned.
     """
@@ -34,6 +38,8 @@ def preprocess(data: pd.DataFrame) -> pd.DataFrame:
     _reset_index_after_dropping_rows(data)
     _rename_columns(data)
     data = _expand_features(data)
+    _remove_listings_with_high_unit_count(data)
+    _reset_index_after_dropping_rows(data)
     return data
 
 
@@ -108,3 +114,14 @@ def _expand_features(data: pd.DataFrame) -> pd.DataFrame:
     data = pd.concat([data, features], axis=1)
     del features, data["features"]
     return data
+
+
+def _remove_listings_with_high_unit_count(data: pd.DataFrame) -> None:
+    """
+    The newly created `features_unitCount` column sometimes contains values
+    greater than 1. This indicates that the home is not used as a single-family homes,
+    and so such homes are dropped from the data.
+
+    This is done in-place.
+    """
+    data.drop(data[data["feature_unitCount"] > 1].index, inplace=True)
