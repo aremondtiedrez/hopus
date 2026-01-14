@@ -25,11 +25,15 @@ def preprocess(data: pd.DataFrame) -> None:
     3. Reset the indexing, so that there are no gaps in indexing
        after rows have been dropped.
     4. Rename the columns.
+    5. Expand the `features` columns, one-hot encoding the results.
+
+    All of these steps happen in-place.
     """
     _focus_in_single_family_homes(data)
     _drop_listings_with_missing_sizes(data)
     _reset_index_after_dropping_rows(data)
     _rename_columns(data)
+    _expand_features(data)
 
 
 def _focus_in_single_family_homes(data: pd.DataFrame) -> None:
