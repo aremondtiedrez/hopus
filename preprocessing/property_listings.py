@@ -34,6 +34,7 @@ def preprocess(data: pd.DataFrame) -> pd.DataFrame:
         replace the missing values with zeroes.
     9.  Replace missing `yearBuilt` entries with the median year of construction.
     10. Convert the sale data to a `pd.Period` format.
+    11. Split the sale data into month and year (as separate columns).
 
     Once all the steps are carried out, the modified `data` `DataFrame` is returned.
     """
@@ -47,6 +48,7 @@ def preprocess(data: pd.DataFrame) -> pd.DataFrame:
     _fill_missing_numeric_values_with_zeroes(data)
     _fill_missing_year_built_with_median(data)
     _convert_sale_date_type(data)
+    _split_sale_date(data)
     return data
 
 
@@ -182,3 +184,13 @@ def _convert_sale_date_type(data: pd.DataFrame) -> None:
     data["saleDate"] = pd.to_datetime(data["saleDate"])
     data["saleDate"] = data["saleDate"].dt.tz_localize(None)
     data["saleDate"] = data["saleDate"].dt.to_period("M")
+
+
+def _split_sale_date(data: pd.DataFrame) -> None:
+    """
+    Split the sale date into two pieces: the month and the year.
+
+    This is done in-place.
+    """
+    data["saleMonth"] = data["saleDate"].dt.month
+    data["saleYear"] = data["saleDate"].dt.year
