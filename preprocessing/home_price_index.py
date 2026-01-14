@@ -39,7 +39,7 @@ def _rename_columns(data: pd.DataFrame, columns=None):
     data.rename(columns=columns, inplace=True)
 
 
-def _convert_date_type(date: pd.DataFrame):
+def _convert_date_type(data: pd.DataFrame):
     """
     Convert the type of the `data` column to be a `datetime` object,
     then keep only the month and the year of that data,
