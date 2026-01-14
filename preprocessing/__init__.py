@@ -9,3 +9,5 @@ More specifically, this module expects data to come from two sources.
   properties. This is obtained via the `properties` endpoint of the RentCast API
   (see https://developers.rentcast.io/reference/property-data).
 """
+
+from . import home_price_index
