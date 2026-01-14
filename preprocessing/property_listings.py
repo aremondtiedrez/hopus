@@ -124,4 +124,4 @@ def _remove_listings_with_high_unit_count(data: pd.DataFrame) -> None:
 
     This is done in-place.
     """
-    data.drop(data[data["feature_unitCount"] > 1].index, inplace=True)
+    data.drop(data[data["features_unitCount"] > 1].index, inplace=True)
