@@ -15,7 +15,7 @@ def load(path: str = "data/data_v1.json") -> pd.DataFrame:
     return pd.read_json(path)
 
 
-def preprocess(data: pd.DataFrame) -> None:
+def preprocess(data: pd.DataFrame) -> pd.DataFrame:
     """
     Pre-process the property listings data.
 
@@ -27,13 +27,14 @@ def preprocess(data: pd.DataFrame) -> None:
     4. Rename the columns.
     5. Expand the `features` columns, one-hot encoding the results.
 
-    All of these steps happen in-place.
+    Once all the steps are carried out, the modified `data` `DataFrame` is returned.
     """
     _focus_in_single_family_homes(data)
     _drop_listings_with_missing_sizes(data)
     _reset_index_after_dropping_rows(data)
     _rename_columns(data)
-    _expand_features(data)
+    data = _expand_features(data)
+    return data
 
 
 def _focus_in_single_family_homes(data: pd.DataFrame) -> None:
@@ -82,7 +83,7 @@ def _rename_columns(data: pd.DataFrame, columns=None) -> None:
     data.rename(columns=columns, inplace=True)
 
 
-def _expand_features(data: pd.DataFrame) -> None:
+def _expand_features(data: pd.DataFrame) -> pd.DataFrame:
     """
     Each entry of the `features` column of the `data` `DataFrame` is a dictionary.
     This is because the data comes from a `json` file, which allows non-homogeneous
@@ -96,10 +97,11 @@ def _expand_features(data: pd.DataFrame) -> None:
     in its stead, one-hot encoded columns of the form `features_exteriorType_Brick` and
     `features_roofType_Slate` are created.
 
-    This is done in-place.
+    Once all of this is done, the updated `data` `DataFrame` is returned.
     """
     features = pd.get_dummies(pd.json_normalize(data["features"]), dummy_na=True)
     features.columns = features.columns.str.replace(r"\W", "", regex=True)
     features = features.add_prefix("features_")
     data = pd.concat([data, features], axis=1)
     del features, data["features"]
+    return data
