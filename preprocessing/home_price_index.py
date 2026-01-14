@@ -21,9 +21,13 @@ def preprocess(data: pd.DataFrame) -> pd.DataFrame:
     1. Rename the columns of the `DataFrame`.
     2. Convert the `date` column to `datetime`, keep only the month and year, and
        use the date as the new index.
+    3. Add a new column called `availableValue` which is a copy of the `trueValue`
+       of the index, but lagging three months behind. See the documentation
+       in `_add_three_month_lagged_value` below for more details.
     """
     _rename_columns(data)
     _convert_date_type(data)
+    _add_three_month_lagged_value(data)
 
 
 def _rename_columns(data: pd.DataFrame, columns=None) -> None:
