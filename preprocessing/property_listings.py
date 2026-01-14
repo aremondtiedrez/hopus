@@ -32,6 +32,7 @@ def preprocess(data: pd.DataFrame) -> pd.DataFrame:
        after rows have been dropped.
     8. For each numeric column that will be used as a prediction feature,
        replace the missing values with zeroes.
+    9. Replace missing `yearBuilt` entries with the median year of construction.
 
     Once all the steps are carried out, the modified `data` `DataFrame` is returned.
     """
@@ -43,6 +44,7 @@ def preprocess(data: pd.DataFrame) -> pd.DataFrame:
     _remove_listings_with_high_unit_count(data)
     _reset_index_after_dropping_rows(data)
     _fill_missing_numeric_values_with_zeroes(data)
+    _fill_missing_year_built_with_median(data)
     return data
 
 
@@ -152,3 +154,17 @@ def _fill_missing_numeric_values_with_zeroes(
         ]
     data[[column + "_nan" for column in numeric_columns]] = data[numeric_columns].isna()
     data.fillna(value={column: 0 for column in numeric_columns}, inplace=True)
+
+
+def _fill_missing_year_built_with_median(data: pd.DataFrame) -> None:
+    """
+    Replaces the missing values in the `yearBuilt` column with the *median*
+    among the non-missing values in that same column.
+
+    Create a sentinel column `yearBuilt_nan` which indicates when the `yearBuild` value
+    was initially missing.
+
+    This is done in-place.
+    """
+    data["yearBuilt_nan"] = data["yearBuilt"].isna()
+    data.fillna(value={"yearBuilt": data["yearBuilt"].median()}, inplace=True)
