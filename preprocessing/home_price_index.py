@@ -19,6 +19,8 @@ def preprocess(data: pd.DataFrame) -> pd.DataFrame:
 
     The steps taken are the following.
     1. Rename the columns of the `DataFrame`.
+    2. Convert the `date` column to `datetime`, keep only the month and year, and
+       use the date as the new index.
     """
     _rename_columns(data)
     _convert_date_type(data)
