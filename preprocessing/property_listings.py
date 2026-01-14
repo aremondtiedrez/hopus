@@ -76,3 +76,26 @@ def _rename_columns(data: pd.DataFrame, columns=None) -> None:
             "lastSaleDate": "saleDate",
         }
     data.rename(columns=columns, inplace=True)
+
+
+def _expand_features(data: pd.DataFrame) -> None:
+    """
+    Each entry of the `features` column of the `data` `DataFrame` is a dictionary.
+    This is because the data comes from a `json` file, which allows non-homogeneous
+    hierarchies of columns.
+
+    The keys of these dictionaries are different types of features,
+    such as `exteriorType` or `roofType`. The values are the feature that particular
+    property has, e.g. `Brick` or `Slate`, respectively.
+
+    Here we expand these features, such that the `features` column is removed and,
+    in its stead, one-hot encoded columns of the form `features_exteriorType_Brick` and
+    `features_roofType_Slate` are created.
+
+    This is done in-place.
+    """
+    features = pd.get_dummies(pd.json_normalize(data["features"]), dummy_na=True)
+    features.columns = features.columns.str.replace(r"\W", "", regex=True)
+    features = features.add_prefix("features_")
+    data = pd.concat([data, features], axis=1)
+    del features, data["features"]
