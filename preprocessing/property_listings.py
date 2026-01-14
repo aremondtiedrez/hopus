@@ -15,9 +15,14 @@ def load(path: str = "data/data_v1.json") -> pd.DataFrame:
     return pd.read_json(path)
 
 
-def preprocess(data: pd.DataFrame) -> pd.DataFrame:
+def preprocess(
+    property_listings_data: pd.DataFrame, home_price_index_data: pd.DataFrame
+) -> pd.DataFrame:
     """
     Pre-process the property listings data.
+
+    Note that the home price index data is also required, since it is eventually merged
+    with the property listings data.
 
     The steps taken are the following.
     1.  Remove listings that are not single-family homes.
@@ -33,23 +38,28 @@ def preprocess(data: pd.DataFrame) -> pd.DataFrame:
     8.  For each numeric column that will be used as a prediction feature,
         replace the missing values with zeroes.
     9.  Replace missing `yearBuilt` entries with the median year of construction.
-    10. Convert the sale data to a `pd.Period` format.
-    11. Split the sale data into month and year (as separate columns).
+    10. Convert the sale date to a `pd.Period` format.
+    11. Split the sale date into month and year (as separate columns).
+    12. Merged with the (already processed) home price index data.
 
-    Once all the steps are carried out, the modified `data` `DataFrame` is returned.
+    Once all the steps are carried out, the modified `property_listings`
+    `DataFrame` is returned.
     """
-    _focus_in_single_family_homes(data)
-    _drop_listings_with_missing_sizes(data)
-    _reset_index_after_dropping_rows(data)
-    _rename_columns(data)
-    data = _expand_features(data)
-    _remove_listings_with_high_unit_count(data)
-    _reset_index_after_dropping_rows(data)
-    _fill_missing_numeric_values_with_zeroes(data)
-    _fill_missing_year_built_with_median(data)
-    _convert_sale_date_type(data)
-    _split_sale_date(data)
-    return data
+    _focus_in_single_family_homes(property_listings_data)
+    _drop_listings_with_missing_sizes(property_listings_data)
+    _reset_index_after_dropping_rows(property_listings_data)
+    _rename_columns(property_listings_data)
+    property_listings_data = _expand_features(property_listings_data)
+    _remove_listings_with_high_unit_count(property_listings_data)
+    _reset_index_after_dropping_rows(property_listings_data)
+    _fill_missing_numeric_values_with_zeroes(property_listings_data)
+    _fill_missing_year_built_with_median(property_listings_data)
+    _convert_sale_date_type(property_listings_data)
+    _split_sale_date(property_listings_data)
+    property_listings_data = _merge_with_home_price_index_data(
+        property_listings_data, home_price_index_data
+    )
+    return property_listings_data
 
 
 def _focus_in_single_family_homes(data: pd.DataFrame) -> None:
@@ -194,3 +204,21 @@ def _split_sale_date(data: pd.DataFrame) -> None:
     """
     data["saleMonth"] = data["saleDate"].dt.month
     data["saleYear"] = data["saleDate"].dt.year
+
+
+def _merge_with_home_price_index_data(
+    property_listings_data: pd.DataFrame, home_price_index_data
+) -> pd.DataFrame:
+    """
+    Merge the property listings data and the home price index data using the date
+    of sale as key on which to join these two DataFrames.
+
+    Returned the merged `DataFrame`.
+    """
+    return pd.merge(
+        left=property_listings_data,
+        right=home_price_index_data.add_suffix("HomePriceIndex"),
+        left_on="saleDate",
+        right_index=True,
+        how="inner",
+    )
