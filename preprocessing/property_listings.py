@@ -21,10 +21,15 @@ def preprocess(data: pd.DataFrame) -> None:
 
     The steps taken are the following.
     1. Remove listings that are not single-family homes.
+    2. Drop listings which are missing either their square footage or lot size.
+    3. Reset the indexing, so that there are no gaps in indexing
+       after rows have been dropped.
+    4. Rename the columns.
     """
     _focus_in_single_family_homes(data)
     _drop_listings_with_missing_sizes(data)
     _reset_index_after_dropping_rows(data)
+    _rename_columns(data)
 
 
 def _focus_in_single_family_homes(data: pd.DataFrame) -> None:
@@ -58,3 +63,16 @@ def _reset_index_after_dropping_rows(data: pd.DataFrame) -> None:
     """
     data.reset_index(inplace=True)
     del data["index"]
+
+
+def _rename_columns(data: pd.DataFrame, columns=None) -> None:
+    """
+    Rename the columns of the `data` `DataFrame` in-place.
+    """
+    if columns is None:
+        columns = {
+            "lastSalePrice": "price",
+            "squareFootage": "sqFt",
+            "lastSaleDate": "saleDate",
+        }
+    data.rename(columns=columns, inplace=True)
