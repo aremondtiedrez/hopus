@@ -41,24 +41,40 @@ def preprocess(
     10. Convert the sale date to a `pd.Period` format.
     11. Split the sale date into month and year (as separate columns).
     12. Merged with the (already processed) home price index data.
+    13. Compute the 'time-normalized price-per-square-foot' (obtained by dividing
+        the price-per-square-foot by the current value of the home price index).
 
     Once all the steps are carried out, the modified `property_listings`
     `DataFrame` is returned.
     """
+    # Step 1
     _focus_in_single_family_homes(property_listings_data)
+    # Step 2
     _drop_listings_with_missing_sizes(property_listings_data)
+    # Step 3
     _reset_index_after_dropping_rows(property_listings_data)
+    # Step 4
     _rename_columns(property_listings_data)
+    # Step 5
     property_listings_data = _expand_features(property_listings_data)
+    # Step 6
     _remove_listings_with_high_unit_count(property_listings_data)
+    # Step 7
     _reset_index_after_dropping_rows(property_listings_data)
+    # Step 8
     _fill_missing_numeric_values_with_zeroes(property_listings_data)
+    # Step 9
     _fill_missing_year_built_with_median(property_listings_data)
+    # Step 10
     _convert_sale_date_type(property_listings_data)
+    # Step 11
     _split_sale_date(property_listings_data)
+    # Step 12
     property_listings_data = _merge_with_home_price_index_data(
         property_listings_data, home_price_index_data
     )
+    # Step 13
+    _compute_time_normalized_price_per_square_foot(property_listings_data)
     return property_listings_data
 
 
@@ -221,4 +237,19 @@ def _merge_with_home_price_index_data(
         left_on="saleDate",
         right_index=True,
         how="inner",
+    )
+
+
+def _compute_time_normalized_price_per_square_foot(data: pd.DataFrame) -> None:
+    """
+    Compute the price-per-square-foot and the time-normalized price-per-square-foot,
+    which is the price-per-square-foot divided by the home price index.
+
+    This can be used to detect outliers.
+
+    This is done in-place.
+    """
+    data["pricePerSqFt"] = data["price"] / data["sqFt"]
+    data["timeNormalizedPricePerSqFt"] = (
+        data["pricePerSqFt"] / data["trueValueHomePriceIndex"]
     )
