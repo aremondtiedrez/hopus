@@ -21,6 +21,7 @@ def preprocess(data: pd.DataFrame) -> pd.DataFrame:
     1. Rename the columns of the `DataFrame`.
     """
     _rename_columns(data)
+    _convert_date_type(data)
 
 
 def _rename_columns(data: pd.DataFrame, columns=None):
@@ -36,3 +37,16 @@ def _rename_columns(data: pd.DataFrame, columns=None):
             "CSUSHPINSA": "trueValue",
         }
     data.rename(columns=columns, inplace=True)
+
+
+def _convert_date_type(date: pd.DataFrame):
+    """
+    Convert the type of the `data` column to be a `datetime` object,
+    then keep only the month and the year of that data,
+    and finally set that column to be the index of the `DataFrame`.
+
+    All of this is done in-place.
+    """
+    data["date"] = pd.to_datetime(data["date"])
+    data["date"] = data["date"].dt.to_period("M")
+    data.set_index("date", inplace=True)
