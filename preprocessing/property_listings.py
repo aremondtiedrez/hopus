@@ -20,19 +20,20 @@ def preprocess(data: pd.DataFrame) -> pd.DataFrame:
     Pre-process the property listings data.
 
     The steps taken are the following.
-    1. Remove listings that are not single-family homes.
-    2. Drop listings which are missing either their square footage or lot size.
-    3. Reset the indexing, so that there are no gaps in indexing
-       after rows have been dropped.
-    4. Rename the columns.
-    5. Expand the `features` columns, one-hot encoding the results.
-    6. Remove the listings whose `features_unitCount` is greater than 1
-       (as they are not single-family homes).
-    7. [Once again] Reset the indexing, so that there are no gaps in indexing
-       after rows have been dropped.
-    8. For each numeric column that will be used as a prediction feature,
-       replace the missing values with zeroes.
-    9. Replace missing `yearBuilt` entries with the median year of construction.
+    1.  Remove listings that are not single-family homes.
+    2.  Drop listings which are missing either their square footage or lot size.
+    3.  Reset the indexing, so that there are no gaps in indexing
+        after rows have been dropped.
+    4.  Rename the columns.
+    5.  Expand the `features` columns, one-hot encoding the results.
+    6.  Remove the listings whose `features_unitCount` is greater than 1
+        (as they are not single-family homes).
+    7.  [Once again] Reset the indexing, so that there are no gaps in indexing
+        after rows have been dropped.
+    8.  For each numeric column that will be used as a prediction feature,
+        replace the missing values with zeroes.
+    9.  Replace missing `yearBuilt` entries with the median year of construction.
+    10. Convert the sale data to a `pd.Period` format.
 
     Once all the steps are carried out, the modified `data` `DataFrame` is returned.
     """
@@ -45,6 +46,7 @@ def preprocess(data: pd.DataFrame) -> pd.DataFrame:
     _reset_index_after_dropping_rows(data)
     _fill_missing_numeric_values_with_zeroes(data)
     _fill_missing_year_built_with_median(data)
+    _convert_sale_date_type(data)
     return data
 
 
@@ -168,3 +170,15 @@ def _fill_missing_year_built_with_median(data: pd.DataFrame) -> None:
     """
     data["yearBuilt_nan"] = data["yearBuilt"].isna()
     data.fillna(value={"yearBuilt": data["yearBuilt"].median()}, inplace=True)
+
+
+def _convert_sale_date_type(data: pd.DataFrame) -> None:
+    """
+    Convert the sale date to the `datetime` format, remove the timezone information, and
+    keep only the month and year. This means that the final format is `pd.Period`.
+
+    This is done in-place.
+    """
+    data["saleDate"] = pd.to_datetime(data["saleDate"])
+    data["saleDate"] = data["saleDate"].dt.tz_localize(None)
+    data["saleDate"] = data["saleDate"].dt.to_period("M")

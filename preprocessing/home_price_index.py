@@ -57,6 +57,8 @@ def _convert_date_type(data: pd.DataFrame) -> None:
     then keep only the month and the year of that data,
     and finally set that column to be the index of the `DataFrame`.
 
+    This means that the new index is of type `pd.Period`.
+
     All of this is done in-place.
     """
     data["date"] = pd.to_datetime(data["date"])
@@ -71,10 +73,10 @@ def _add_three_month_lagged_value(data: pd.DataFrame):
     words the home price index for January is only published in April.
     Here we account for this by creating a three-month shifted copy of the index.
 
-    The `data` `DataFrame` is expected to be indexed by a `datetime` object whose period
-    is monthly (i.e. that object contains information about the month and year only) and
-    to contain a single column called `trueValue`. The `trueValue` is the actual value
-    of the home price index that month.
+    The `data` `DataFrame` is expected to be indexed by a `pd.Period` object whose
+    period is monthly (i.e. that object contains information about the month and
+    year only) and to contain a single column called `trueValue`.
+    The `trueValue` is the actual value of the home price index that month.
 
     We create a second column, called `availableValue`, which shows, for month M,
     the home price index publicly available at that time. In other words:
