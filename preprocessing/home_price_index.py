@@ -24,10 +24,14 @@ def preprocess(data: pd.DataFrame) -> pd.DataFrame:
     3. Add a new column called `availableValue` which is a copy of the `trueValue`
        of the index, but lagging three months behind. See the documentation
        in `_add_three_month_lagged_value` below for more details.
+    4. Combine the `availableValue` and a seasonal adjustment to make a prediction
+       for the home price index value.
+       See the documentation in `_compute_seasonal_adjustment` for details.
     """
     _rename_columns(data)
     _convert_date_type(data)
     _add_three_month_lagged_value(data)
+    _compute_seasonal_adjustment(data)
 
 
 def _rename_columns(data: pd.DataFrame, columns=None) -> None:
@@ -85,3 +89,28 @@ def _add_three_month_lagged_value(data: pd.DataFrame):
     """
     data["availableValue"] = data["trueValue"].shift(3)
     data.dropna(how="any", inplace=True)
+
+
+def _compute_seasonal_adjustment(data: pd.DataFrame):
+    """
+    The crudest prediction of the true home price index would be to simply use
+    the available price index. In other words we would predict the true home price index
+    by saying that it will be the same as the home price index from three months prior.
+
+    We can do a little bit better and account for the fact
+    that home prices are seasonal: they are higher in the summer and
+    lower in the winter.
+
+    We do this by computing the average, for each month of the year, of the difference
+    between the true home price index and the available (i.e. 3-month lagged)
+    home price index. We then add this average to the available home price index
+    to make produced our prediction.
+
+    This is done in-place.
+    """
+    data["trueMinusAvailable"] = data["trueValue"] - data["availableValue"]
+    grouped_by_month = data.groupby(data.index.month)
+    data["monthAvgTrueMinusAvailable"] = grouped_by_month[
+        "trueMinusAvailable"
+    ].transform("mean")
+    data["predictedValue"] = data["availableValue"] + data["monthAvgTrueMinusAvailable"]
