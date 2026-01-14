@@ -147,7 +147,7 @@ def _fill_missing_numeric_values_with_zeroes(
             "bedrooms",
             "bathrooms",
             "features_floorCount",
-            "features_garageSpace",
+            "features_garageSpaces",
             "features_roomCount",
         ]
     data[[column + "_nan" for column in numeric_columns]] = data[numeric_columns].isna()
