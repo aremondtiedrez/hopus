@@ -27,6 +27,7 @@ saleDate,unused
 saleMonth,auxiliaryPredictionFeatures
 saleYear,keyPredictionFeatures
 price,target
+logPrice,target
 taxAssessments,unused
 propertyTaxes,unused
 history,unused

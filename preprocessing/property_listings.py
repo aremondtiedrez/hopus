@@ -4,6 +4,7 @@ obtained via the `properties` endpoints of the RentCast API
 (see https://developers.rentcast.io/reference/property-data).
 """
 
+import numpy as np
 import pandas as pd
 
 
@@ -43,6 +44,7 @@ def preprocess(
     12. Merged with the (already processed) home price index data.
     13. Compute the 'time-normalized price-per-square-foot' (obtained by dividing
         the price-per-square-foot by the current value of the home price index).
+    14. Compute the logarithms of the sale prices.
 
     Once all the steps are carried out, the modified `property_listings`
     `DataFrame` is returned.
@@ -75,6 +77,8 @@ def preprocess(
     )
     # Step 13
     _compute_time_normalized_price_per_square_foot(property_listings_data)
+    # Step 14
+    _compute_log_price(property_listings_data)
     return property_listings_data
 
 
@@ -335,3 +339,12 @@ def _compute_time_normalized_price_per_square_foot(data: pd.DataFrame) -> None:
     data["timeNormalizedPricePerSqFt"] = (
         data["pricePerSqFt"] / data["trueValueHomePriceIndex"]
     )
+
+
+def _compute_log_price(data: pd.DataFrame) -> None:
+    """
+    Use the `price` column to compute the `logPrice` column.
+
+    This is done in-place.
+    """
+    data["logPrice"] = np.log(data["price"])
