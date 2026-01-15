@@ -43,7 +43,6 @@ def preprocess(
     12. Merged with the (already processed) home price index data.
     13. Compute the 'time-normalized price-per-square-foot' (obtained by dividing
         the price-per-square-foot by the current value of the home price index).
-    14. Group the columns into categories as specified by an external `csv` file.
 
     Once all the steps are carried out, the modified `property_listings`
     `DataFrame` is returned.
@@ -76,9 +75,68 @@ def preprocess(
     )
     # Step 13
     _compute_time_normalized_price_per_square_foot(property_listings_data)
-    # Step 14
-    _group_columns(property_listings_data)
     return property_listings_data
+
+
+def drop_outliers(data: pd.DataFrame, cutoff: tuple[float, float] = (0.2, 2.0)) -> None:
+    """
+    We use the `timeNormalizedPricePerSqFt' column to detect, and drop, outliers.
+
+    These are property listings where the sale price is, to be informal, *surprising*.
+    It can be surprisingly low or surprisingly high, and typically this is due to
+    factors that are not directly accessible in the data. For example a property may
+    be sold at a very low price because the previous owner and occupant passed away, or
+    it may be sold at a very high price because the house comes with a gorgeous view
+    overlooking a lake.
+
+    The default cutoffs chosen at 0.2 and 2.0 are arbitrary.
+    On the preliminary data they remove about a dozen outliers each,
+    out of about 1,700 samples.
+
+    This is done in-place and the index is reset after the rows are dropped.
+    """
+    low_cutoff, high_cutoff = cutoff
+    data.drop(
+        data[
+            (data["timeNormalizedPricePerSqFt"] < low_cutoff)
+            | (data["timeNormalizedPricePerSqFt"] > high_cutoff)
+        ].index,
+        inplace=True,
+    )
+    _reset_index_after_dropping_rows(data)
+
+
+def group_columns(
+    data: pd.DataFrame,
+    partial_column_to_group_map_path: str = "config/partial_column_to_group_map.csv",
+) -> None:
+    """
+    Group the property listings data columns into four categories:
+    - `identification` (e.g. the address, ZIP code, etc.),
+    - `predictionFeatures` (e.g. the square footage, number of bedrooms, etc.),
+    - `target` (i.e. the price), and
+    - `unused` (for miscellaneous columns, such as the `zoning` column).
+
+    The map which takes a column name to a category is encoded externally, in the `csv`
+    file `partial_column_to_group_map_path`, except for the `features_` columns:
+    they are all mapped to the `predictionFeatures` group
+    (except for `features_unitCount` which is mapped to `unused`).
+
+    This is done in-place.
+    """
+
+    # Build the multi_index_map
+    partial_column_to_group_map = pd.read_csv(partial_column_to_group_map_path)
+    multi_index_map = dict(
+        zip(partial_column_to_group_map["Key"], partial_column_to_group_map["Value"])
+    )
+    multi_index_map.update(
+        {col: "predictionFeatures" for col in data.columns if col[:9] == "features_"}
+    )
+    multi_index_map["feature_unitCount"] = "unused"
+    data.columns = pd.MultiIndex.from_arrays(
+        [[multi_index_map[column] for column in data.columns], data.columns]
+    )
 
 
 def _focus_in_single_family_homes(data: pd.DataFrame) -> None:
@@ -255,37 +313,4 @@ def _compute_time_normalized_price_per_square_foot(data: pd.DataFrame) -> None:
     data["pricePerSqFt"] = data["price"] / data["sqFt"]
     data["timeNormalizedPricePerSqFt"] = (
         data["pricePerSqFt"] / data["trueValueHomePriceIndex"]
-    )
-
-
-def _group_columns(
-    data: pd.DataFrame,
-    partial_column_to_group_map_path: str = "config/partial_column_to_group_map.csv",
-) -> None:
-    """
-    Group the property listings data columns into four categories:
-    - `identification` (e.g. the address, ZIP code, etc.),
-    - `predictionFeatures` (e.g. the square footage, number of bedrooms, etc.),
-    - `target` (i.e. the price), and
-    - `unused` (for miscellaneous columns, such as the `zoning` column).
-
-    The map which takes a column name to a category is encoded externally, in the `csv`
-    file `partial_column_to_group_map_path`, except for the `features_` columns:
-    they are all mapped to the `predictionFeatures` group
-    (except for `features_unitCount` which is mapped to `unused`).
-
-    This is done in-place.
-    """
-
-    # Build the multi_index_map
-    partial_column_to_group_map = pd.read_csv(partial_column_to_group_map_path)
-    multi_index_map = dict(
-        zip(partial_column_to_group_map["Key"], partial_column_to_group_map["Value"])
-    )
-    multi_index_map.update(
-        {col: "predictionFeatures" for col in data.columns if col[:9] == "features_"}
-    )
-    multi_index_map["feature_unitCount"] = "unused"
-    data.columns = pd.MultiIndex.from_arrays(
-        [[multi_index_map[column] for column in data.columns], data.columns]
     )
