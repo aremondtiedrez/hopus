@@ -106,6 +106,30 @@ def drop_outliers(data: pd.DataFrame, cutoff: tuple[float, float] = (0.2, 2.0)) 
     _reset_index_after_dropping_rows(data)
 
 
+def drop_missing_key_features(
+    data: pd.DataFrame, column_to_group_map_path: str = "config/column_to_group_map.csv"
+) -> None:
+    """
+    We use an external `csv` file to label certain columns as *key* prediction features.
+    All rows which are missing data in at least one of these columns is then dropped.
+
+    This is done inplace and the index is reset after the rows are dropped.
+    """
+    column_to_group_map = pd.read_csv(column_to_group_map_path)
+    column_to_group_map = dict(
+        zip(column_to_group_map["Key"], column_to_group_map["Value"])
+    )
+    for column in data.columns:
+        if (
+            column in column_to_group_map
+            and column_to_group_map[column] == "keyPredictionFeatures"
+            and (column + "_nan") in data.columns
+        ):
+            data.drop(data[data[column + "_nan"] == 1].index, inplace=True)
+            del data[column + "_nan"]
+    _reset_index_after_dropping_rows(data)
+
+
 def group_columns(
     data: pd.DataFrame,
     column_to_group_map_path: str = "config/column_to_group_map.csv",
