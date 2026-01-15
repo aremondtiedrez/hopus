@@ -113,7 +113,8 @@ def group_columns(
     """
     Group the property listings data columns into four categories:
     - `identification` (e.g. the address, ZIP code, etc.),
-    - `predictionFeatures` (e.g. the square footage, number of bedrooms, etc.),
+    - `keyPredictionFeatures` (e.g. the square footage, number of bedrooms, etc.),
+    - `auxiliaryPredictionFeatures` (e.g. whether there is a garage, a fireplace, etc.),
     - `target` (i.e. the price), and
     - `unused` (for miscellaneous columns, such as the `zoning` column).
 
@@ -130,10 +131,6 @@ def group_columns(
     multi_index_map = dict(
         zip(partial_column_to_group_map["Key"], partial_column_to_group_map["Value"])
     )
-    multi_index_map.update(
-        {col: "predictionFeatures" for col in data.columns if col[:9] == "features_"}
-    )
-    multi_index_map["feature_unitCount"] = "unused"
     data.columns = pd.MultiIndex.from_arrays(
         [[multi_index_map[column] for column in data.columns], data.columns]
     )
