@@ -108,7 +108,7 @@ def drop_outliers(data: pd.DataFrame, cutoff: tuple[float, float] = (0.2, 2.0)) 
 
 def group_columns(
     data: pd.DataFrame,
-    partial_column_to_group_map_path: str = "config/partial_column_to_group_map.csv",
+    column_to_group_map_path: str = "config/column_to_group_map.csv",
 ) -> None:
     """
     Group the property listings data columns into four categories:
@@ -119,7 +119,7 @@ def group_columns(
     - `unused` (for miscellaneous columns, such as the `zoning` column).
 
     The map which takes a column name to a category is encoded externally, in the `csv`
-    file `partial_column_to_group_map_path`, except for the `features_` columns:
+    file `column_to_group_map_path`, except for the `features_` columns:
     they are all mapped to the `predictionFeatures` group
     (except for `features_unitCount` which is mapped to `unused`).
 
@@ -127,9 +127,9 @@ def group_columns(
     """
 
     # Build the multi_index_map
-    partial_column_to_group_map = pd.read_csv(partial_column_to_group_map_path)
+    column_to_group_map = pd.read_csv(column_to_group_map_path)
     multi_index_map = dict(
-        zip(partial_column_to_group_map["Key"], partial_column_to_group_map["Value"])
+        zip(column_to_group_map["Key"], column_to_group_map["Value"])
     )
     data.columns = pd.MultiIndex.from_arrays(
         [[multi_index_map[column] for column in data.columns], data.columns]
