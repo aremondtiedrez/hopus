@@ -5,6 +5,10 @@ This module contains methods used to evaluate the various models.
 import numpy as np
 import pandas as pd
 
+from sklearn.model_selection import KFold
+
+import models
+
 
 def hpi_mse(property_listings: pd.DataFrame, target: str = "price") -> float:
     """
@@ -54,3 +58,59 @@ def hpi_rmse(property_listings: pd.DataFrame, target: str = "price") -> float:
     the error in prices or log-prices is to be computed.
     """
     return np.sqrt(hpi_mse(property_listings, target))
+
+
+def cv_evaluation(  # pylint: disable=too-many-arguments, too-many-locals
+    model_class: models.Model,
+    data: pd.DataFrame,
+    features_label: str,
+    target_label: str,
+    n_splits: int,
+    seed: int,
+) -> tuple[float, float, list[models.Model]]:
+    """
+    Performs cross-validation on a `model` using the `data` provided (whose features and
+    target are specified by `features_label` and `target_label`).
+
+    The split into folds is governed by `n_splits`, the number of folds to split
+    the data into, and `seed`, an integer which is used as the random seed for
+    the random splitting.
+
+    Returns
+    train_cv_mse    Average mean squared error over the training folds.
+    test_cv_mse     Average mean squared error over the testing folds.
+    trained_models  List of trained models, each of which is
+                    an instance of `models.Model`.
+    """
+
+    # Extract the features and target
+    features = data[features_label]
+    target = data[target_label]
+
+    # Split the data (virtually, i.e. by splitting the indices)
+    fold_indices = list(
+        KFold(n_splits=n_splits, shuffle=True, random_state=seed).split(data)
+    )
+
+    # Train and evaluate the models
+    trained_models = []
+    squared_errors = np.zeros(shape=(n_splits, 2))
+    for fold_number, (train_indices, test_indices) in enumerate(fold_indices):
+
+        # Training
+        model = model_class()
+        trained_models.append(model)
+        model.fit(features.iloc[train_indices], target.iloc[train_indices])
+
+        # Evaluation
+        train_mse = model.evaluate(
+            features.iloc[train_indices], target.iloc[train_indices]
+        )
+        test_mse = model.evaluate(
+            features.iloc[test_indices], target.iloc[test_indices]
+        )
+        squared_errors[fold_number] = train_mse, test_mse
+
+    train_cv_mse, test_cv_mse = squared_errors.mean(axis=0)
+
+    return train_cv_mse, test_cv_mse, trained_models
