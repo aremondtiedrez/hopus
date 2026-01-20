@@ -3,12 +3,12 @@ This module contains methods used to build and train various models.
 """
 
 from abc import ABC, abstractmethod
-from sklearn.linear_model import LinearRegression
+from sklearn.linear_model import LinearRegression as _LinearRegression
 from sklearn.metrics import mean_squared_error
 
 import pandas as pd
 
-from xgboost import XGBRegressor
+from xgboost import XGBRegressor as _XGBRegressor
 
 
 class Model(ABC):
@@ -35,7 +35,7 @@ class Model(ABC):
         return mean_squared_error(target, predictions)
 
 
-class BaselineModel(Model):
+class Baseline(Model):
     """
     The baseline model proceeds as follows. It uses the training set to compute,
     for each ZIP code, the mean over that ZIP code of the time-normalized
@@ -60,13 +60,13 @@ class BaselineModel(Model):
           its method `_compute_seasonal_adjustment`), and
         - `sqFt`.
 
-        This is a thin wrapper around `BaselineModel._fit`.
+        This is a thin wrapper around `Baseline._fit`.
         """
         self._fit(features)
 
     def _fit(self, features):
         """
-        Fit the baseline mode. This is called via `BaselineModel.fit`.
+        Fit the baseline mode. This is called via `Baseline.fit`.
         """
         self._zipcode_averages = features.groupby("zipCode").agg(
             meanTimeNormalizedPricePerSqFtInZipcode=(
@@ -82,7 +82,7 @@ class BaselineModel(Model):
         This method expects the input `DataFrame` `features` to have
         the following columns:
         - `zipCode`,
-        - `meanTimeNormalizedPricePerSqFtInZipcode` (see `BaselineModel.fit`),
+        - `meanTimeNormalizedPricePerSqFtInZipcode` (see `Baseline.fit`),
         - `predictedValueHomePriceIndex` (see `preprocessing.home_price_index` and
           its method `_compute_seasonal_adjustment`), and
         - `sqFt`.
@@ -98,7 +98,7 @@ class BaselineModel(Model):
         return merged_features["predictedPrice"]
 
 
-class LinearRegressionModel(Model):
+class LinearRegression(Model):
     """
     This is essentially a thin wrapper around `sklearn.linear_model.LinearRegression`.
     The purpose of this wrapper is to provide homogeneous access to various models,
@@ -108,7 +108,7 @@ class LinearRegressionModel(Model):
 
     def __init__(self):
         """Initialize a linear regression model."""
-        self._model = LinearRegression()
+        self._model = _LinearRegression()
 
     def fit(self, features, target):
         """
@@ -122,12 +122,12 @@ class LinearRegressionModel(Model):
         return self._model.predict(features)
 
 
-class XGBRegressorModel(Model):
+class BoostedTree(Model):
     """This is a thin wrapper around the 'XGBRegressor' of the 'xgboost' library."""
 
     def __init__(self, **hyperparameters):
-        """Initialize an 'XGBRegressorModel' object."""
-        self._model = XGBRegressor(**hyperparameters)
+        """Initialize a 'BoostedTree' object."""
+        self._model = _XGBRegressor(**hyperparameters)
 
     def fit(self, features, target):
         """

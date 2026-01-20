@@ -60,7 +60,7 @@ def hpi_rmse(property_listings: pd.DataFrame, target: str = "price") -> float:
     return np.sqrt(hpi_mse(property_listings, target))
 
 
-def cv_evaluation(  # pylint: disable=too-many-arguments, too-many-locals
+def cv_evaluation(  # pylint: disable=too-many-locals
     model_class: models.Model,
     features: pd.DataFrame,
     target: pd.Series,
