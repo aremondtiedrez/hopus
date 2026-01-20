@@ -82,6 +82,9 @@ def cv_evaluation(  # pylint: disable=too-many-locals, too-many-arguments
     trained_models  List of trained models, each of which is
                     an instance of `models.Model`.
     """
+    # Input validation
+    if hyperparameters is None:
+        hyperparameters = {}
 
     # Split the data (virtually, i.e. by splitting the indices)
     # This is where it is essential that the `features` and `target`
