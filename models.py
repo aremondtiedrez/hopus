@@ -8,6 +8,8 @@ from sklearn.metrics import mean_squared_error
 
 import pandas as pd
 
+from xgboost import XGBRegressor
+
 
 class Model(ABC):
     """
@@ -107,6 +109,25 @@ class LinearRegressionModel(Model):
     def __init__(self):
         """Initialize a linear regression model."""
         self._model = LinearRegression()
+
+    def fit(self, features, target):
+        """
+        Fit the model to the given features X and target y
+        (typically the training data).
+        """
+        self._model.fit(features, target)
+
+    def predict(self, features):
+        """Returns a prediction obtained by mapping the features through the model."""
+        return self._model.predict(features)
+
+
+class XGBRegressorModel(Model):
+    """This is a thin wrapper around the 'XGBRegressor' of the 'xgboost' library."""
+
+    def __init__(self, **hyperparameters):
+        """Initialize an 'XGBRegressorModel' object."""
+        self._model = XGBRegressor(**hyperparameters)
 
     def fit(self, features, target):
         """

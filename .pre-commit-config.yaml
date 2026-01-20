@@ -7,4 +7,4 @@ repos:
     rev: v3.0.3
     hooks:
       - id: pylint
-        additional_dependencies: [pandas, scikit-learn]
+        additional_dependencies: [pandas, scikit-learn, xgboost]
