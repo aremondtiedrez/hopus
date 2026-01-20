@@ -122,11 +122,11 @@ class LinearRegression(Model):
         return self._model.predict(features)
 
 
-class BoostedTree(Model):
+class BoostedTrees(Model):
     """This is a thin wrapper around the 'XGBRegressor' of the 'xgboost' library."""
 
     def __init__(self, **hyperparameters):
-        """Initialize a 'BoostedTree' object."""
+        """Initialize a 'BoostedTrees' object."""
         self._model = _XGBRegressor(**hyperparameters)
 
     def fit(self, features, target):
