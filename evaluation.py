@@ -60,12 +60,13 @@ def hpi_rmse(property_listings: pd.DataFrame, target: str = "price") -> float:
     return np.sqrt(hpi_mse(property_listings, target))
 
 
-def cv_evaluation(  # pylint: disable=too-many-locals
+def cv_evaluation(  # pylint: disable=too-many-locals, too-many-arguments
     model_class: models.Model,
     features: pd.DataFrame,
     target: pd.Series,
     n_splits: int,
     seed: int,
+    hyperparameters: dict = None,
 ) -> tuple[float, float, list[models.Model]]:
     """
     Performs cross-validation on a `model` using the `features` and `target` provided.
@@ -95,7 +96,7 @@ def cv_evaluation(  # pylint: disable=too-many-locals
     for fold_number, (train_indices, test_indices) in enumerate(fold_indices):
 
         # Training
-        model = model_class()
+        model = model_class(**hyperparameters)
         trained_models.append(model)
         model.fit(features.iloc[train_indices], target.iloc[train_indices])
 
