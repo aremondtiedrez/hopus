@@ -62,15 +62,14 @@ def hpi_rmse(property_listings: pd.DataFrame, target: str = "price") -> float:
 
 def cv_evaluation(  # pylint: disable=too-many-arguments, too-many-locals
     model_class: models.Model,
-    data: pd.DataFrame,
-    features_label: str,
-    target_label: str,
+    features: pd.DataFrame,
+    target: pd.Series,
     n_splits: int,
     seed: int,
 ) -> tuple[float, float, list[models.Model]]:
     """
-    Performs cross-validation on a `model` using the `data` provided (whose features and
-    target are specified by `features_label` and `target_label`).
+    Performs cross-validation on a `model` using the `features` and `target` provided.
+    This method expects `features` and `target` to share the same index.
 
     The split into folds is governed by `n_splits`, the number of folds to split
     the data into, and `seed`, an integer which is used as the random seed for
@@ -83,13 +82,11 @@ def cv_evaluation(  # pylint: disable=too-many-arguments, too-many-locals
                     an instance of `models.Model`.
     """
 
-    # Extract the features and target
-    features = data[features_label]
-    target = data[target_label]
-
     # Split the data (virtually, i.e. by splitting the indices)
+    # This is where it is essential that the `features` and `target`
+    # share the same index.
     fold_indices = list(
-        KFold(n_splits=n_splits, shuffle=True, random_state=seed).split(data)
+        KFold(n_splits=n_splits, shuffle=True, random_state=seed).split(features)
     )
 
     # Train and evaluate the models
