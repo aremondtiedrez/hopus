@@ -6,6 +6,8 @@ from abc import ABC, abstractmethod
 from sklearn.linear_model import LinearRegression
 from sklearn.metrics import mean_squared_error
 
+import pandas as pd
+
 
 class Model(ABC):
     """
@@ -29,6 +31,69 @@ class Model(ABC):
         the predictions made by the model from the features."""
         predictions = self.predict(features)
         return mean_squared_error(target, predictions)
+
+
+class Baseline(Model):
+    """
+    The baseline model proceeds as follows. It uses the training set to compute,
+    for each ZIP code, the mean over that ZIP code of the time-normalized
+    price-per-square-foot. Over the training set, these means over ZIP codes are then
+    multiplied by the predicted value of the home price index and the square footage
+    to produce the price prediction.
+    """
+
+    def __init__(self):
+        """Initialize a baseline model."""
+        self.zipcode_averages = None
+
+    def fit(self, features, target):
+        """
+        Fit the baseline model. Crucially: the baseline model does not need the `target`
+        `DataFrame` to be trained, however it does require that
+        the `features` `DataFrame` contain the following columns:
+        - `zipCode`,
+        - `timeNormalizedPricePerSqFt` (see `preprocessing.property_listings` and
+          its method `_compute_time_normalized_price_per_square_foot`),
+        - `predictedValueHomePriceIndex` (see `preprocessing.home_price_index` and
+          its method `_compute_seasonal_adjustment`), and
+        - `sqFt`.
+
+        This is a thin wrapper around `Baseline._fit`.
+        """
+        self._fit(features)
+
+    def _fit(self, features):
+        """
+        Fit the baseline mode. This is called via `Baseline.fit`.
+        """
+        self.zipcode_averages = features.groupby("zipCode").agg(
+            meanTimeNormalizedPricePerSqFtInZipcode=(
+                "timeNormalizedPricePerSqFt",
+                "mean",
+            )
+        )
+
+    def predict(self, features):
+        """
+        Make a prediction using the baseline model.
+
+        This method expects the input `DataFrame` `features` to have
+        the following columns:
+        - `zipCode`,
+        - `meanTimeNormalizedPricePerSqFtInZipcode` (see `Baseline.fit`),
+        - `predictedValueHomePriceIndex` (see `preprocessing.home_price_index` and
+          its method `_compute_seasonal_adjustment`), and
+        - `sqFt`.
+        """
+        merged_features = pd.merge(
+            features, self.zipcode_averages, on="zipCode", how="left"
+        )
+        merged_features["predictedPrice"] = (
+            merged_features["meanTimeNormalizedPricePerSqFtInZipcode"]
+            * merged_features["predictedValueHomePriceIndex"]
+            * merged_features["sqFt"]
+        )
+        return merged_features["predictedPrice"]
 
 
 class LinearRegressionModel(Model):
