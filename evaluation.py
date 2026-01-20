@@ -64,8 +64,8 @@ def cv_evaluation(  # pylint: disable=too-many-locals, too-many-arguments
     model_class: models.Model,
     features: pd.DataFrame,
     target: pd.Series,
-    n_splits: int,
-    seed: int,
+    n_splits: int = 5,
+    seed: int = 2026,
     hyperparameters: dict = None,
 ) -> tuple[float, float, list[models.Model]]:
     """
