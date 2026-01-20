@@ -33,7 +33,7 @@ class Model(ABC):
         return mean_squared_error(target, predictions)
 
 
-class Baseline(Model):
+class BaselineModel(Model):
     """
     The baseline model proceeds as follows. It uses the training set to compute,
     for each ZIP code, the mean over that ZIP code of the time-normalized
@@ -44,7 +44,7 @@ class Baseline(Model):
 
     def __init__(self):
         """Initialize a baseline model."""
-        self.zipcode_averages = None
+        self._zipcode_averages = None
 
     def fit(self, features, target):
         """
@@ -58,15 +58,15 @@ class Baseline(Model):
           its method `_compute_seasonal_adjustment`), and
         - `sqFt`.
 
-        This is a thin wrapper around `Baseline._fit`.
+        This is a thin wrapper around `BaselineModel._fit`.
         """
         self._fit(features)
 
     def _fit(self, features):
         """
-        Fit the baseline mode. This is called via `Baseline.fit`.
+        Fit the baseline mode. This is called via `BaselineModel.fit`.
         """
-        self.zipcode_averages = features.groupby("zipCode").agg(
+        self._zipcode_averages = features.groupby("zipCode").agg(
             meanTimeNormalizedPricePerSqFtInZipcode=(
                 "timeNormalizedPricePerSqFt",
                 "mean",
@@ -80,13 +80,13 @@ class Baseline(Model):
         This method expects the input `DataFrame` `features` to have
         the following columns:
         - `zipCode`,
-        - `meanTimeNormalizedPricePerSqFtInZipcode` (see `Baseline.fit`),
+        - `meanTimeNormalizedPricePerSqFtInZipcode` (see `BaselineModel.fit`),
         - `predictedValueHomePriceIndex` (see `preprocessing.home_price_index` and
           its method `_compute_seasonal_adjustment`), and
         - `sqFt`.
         """
         merged_features = pd.merge(
-            features, self.zipcode_averages, on="zipCode", how="left"
+            features, self._zipcode_averages, on="zipCode", how="left"
         )
         merged_features["predictedPrice"] = (
             merged_features["meanTimeNormalizedPricePerSqFtInZipcode"]
