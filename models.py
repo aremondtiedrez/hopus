@@ -34,6 +34,14 @@ class Model(ABC):
         predictions = self.predict(features)
         return mean_squared_error(target, predictions)
 
+    @abstractmethod
+    def save(self, filepath: str):
+        """Save the model."""
+
+    @abstractmethod
+    def load(self, filepath: str):
+        """Load the model."""
+
 
 class Baseline(Model):
     """
@@ -96,6 +104,22 @@ class Baseline(Model):
             * merged_features["sqFt"]
         )
         return merged_features["predictedPrice"]
+
+    def save(self, filepath: str):
+        """
+        Save the model by saving the means, over each ZIP code, of the time-normalized
+        price-per-square-foot. Since that data is stored internally as a `pandas`
+        `DataFramed` it is saved as a `csv` file.
+        """
+        self._zipcode_averages.to_csv(filepath)
+
+    def load(self, filepath: str):
+        """
+        Load the model by loading the means, over each ZIP code, of the time-normalized
+        price-per-square-foot. That data is expected to be stored externally as a `csv`
+        file and is then loaded and stored internally as a `pandas` `DataFrame`.
+        """
+        self._zipcode_averages = pd.read_csv(filepath)
 
 
 class LinearRegression(Model):
