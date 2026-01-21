@@ -192,3 +192,19 @@ class BoostedTrees(Model):
     def predict(self, features):
         """Returns a prediction obtained by mapping the features through the model."""
         return self._model.predict(features)
+
+    def save(self, filename: str):
+        """
+        Save the model by using the built-in save function from `xgboost`.
+
+        The filename should NOT include the `.model` extension.
+        """
+        self._model.save_model(filename + ".model")
+
+    def load(self, filename: str):
+        """
+        Load the model by using the built-in load function from `xgboost`.
+
+        The filename should NOT include the `.model` extension.
+        """
+        self._model.load_model(filename + ".model")
