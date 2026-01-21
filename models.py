@@ -160,7 +160,7 @@ class LinearRegression(Model):
         np.savez(
             filename + ".npz",
             coefficients=self._model.coef_,
-            intercept=self._model.intercept,
+            intercept=self._model.intercept_,
         )
 
     def load(self, filename: str):
