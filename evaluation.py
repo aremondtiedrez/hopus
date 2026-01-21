@@ -2,10 +2,12 @@
 This module contains methods used to evaluate the various models.
 """
 
-import numpy as np
-import pandas as pd
+import secrets
 
 from sklearn.model_selection import KFold
+
+import numpy as np
+import pandas as pd
 
 import models
 
@@ -115,3 +117,55 @@ def cv_evaluation(  # pylint: disable=too-many-locals, too-many-arguments
     train_cv_mse, test_cv_mse = squared_errors.mean(axis=0)
 
     return train_cv_mse, test_cv_mse, trained_models
+
+
+def run_experiment(  # pylint: disable=too-many-arguments
+    features: pd.DataFrame,
+    target: pd.DataFrame,
+    model_class: models.Model,
+    hyperparameters: dict,
+    n_experiments: int,
+    n_splits: int,
+) -> dict:
+    """
+    Given a model class, hyperparameters, and experiment parameters, train models
+    of that class and with these parameters. The experiment parameters are `n_splits`
+    and `n_experiments`, which set the number of cross-validation folds and the number
+    of experiments to run, respectively.
+
+    Arguments
+    features                The inputs of the model.
+    target                  The true target outputs.
+    model_class             The class of model to train (from `models`).
+    hyperparameters         A dictionary of hyperparameters. The keys of this dictionary
+                            must be the names of keyword arguments that can be passed to
+                            the given model class.
+    n_experiments           The number of experiments to run (each will use a random
+                            seed for splitting the data into cross-validation folds).
+    n_splits                The number of cross-validation folds used.
+
+    Returns
+    record                  A dictionary whose keys are the hyperparameters,
+                            experiment parameters, and experiment result names and
+                            the values are their corresponding values.
+    """
+    experiment_parameters = {"n_splits": n_splits, "seed": None}
+    for _ in range(n_experiments):
+        experiment_parameters["seed"] = secrets.randbits(32)
+        train_cv_mse, test_cv_mse, _ = cv_evaluation(
+            model_class,
+            features,
+            target,
+            **experiment_parameters,
+            hyperparameters=hyperparameters,
+        )
+        experiment_result = {
+            "train_cv_mse": train_cv_mse,
+            "test_cv_mse": test_cv_mse,
+        }
+        record = {
+            **experiment_parameters,
+            **hyperparameters,
+            **experiment_result,
+        }
+    return record
