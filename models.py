@@ -25,7 +25,7 @@ class Model(ABC):
         """
 
     @abstractmethod
-    def predict(self, features):
+    def predict(self, features, **kwargs):
         """Returns a prediction obtained by mapping the features through the model."""
 
     def evaluate(self, features, target):
@@ -84,7 +84,7 @@ class Baseline(Model):
             )
         )
 
-    def predict(self, features):
+    def predict(self, features, target_type="price", **kwargs):
         """
         Make a prediction using the baseline model.
 
@@ -96,6 +96,10 @@ class Baseline(Model):
           its method `_compute_seasonal_adjustment`), and
         - `sqFt`.
         """
+        # Input validation
+        if target_type not in ("price", "log_price"):
+            raise ValueError("The `target_type` must be either `price` or `log_price`.")
+
         merged_features = pd.merge(
             features, self._zipcode_averages, on="zipCode", how="left"
         )
@@ -104,7 +108,14 @@ class Baseline(Model):
             * merged_features["predictedValueHomePriceIndex"]
             * merged_features["sqFt"]
         )
-        return merged_features["predictedPrice"]
+
+        # If the target type is `price`, return the prediction
+        if target_type == "price":
+            return merged_features["predictedPrice"]
+
+        # Otherwise, compute the predicted log-price and return that
+        merged_features["predictedLogPrice"] = np.log(merged_features["predictedPrice"])
+        return merged_features["predictedLogPrice"]
 
     def save(self, filename: str):
         """
@@ -146,7 +157,7 @@ class LinearRegression(Model):
         """
         self._model.fit(features, target)
 
-    def predict(self, features):
+    def predict(self, features, **kwargs):
         """Returns a prediction obtained by mapping the features through the model."""
         return self._model.predict(features)
 
@@ -189,7 +200,7 @@ class BoostedTrees(Model):
         """
         self._model.fit(features, target)
 
-    def predict(self, features):
+    def predict(self, features, **kwargs):
         """Returns a prediction obtained by mapping the features through the model."""
         return self._model.predict(features)
 
