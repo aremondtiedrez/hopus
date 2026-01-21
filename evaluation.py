@@ -69,6 +69,7 @@ def cv_evaluation(  # pylint: disable=too-many-locals, too-many-arguments
     n_splits: int = 5,
     seed: int = 2026,
     hyperparameters: dict = None,
+    **kwargs,
 ) -> tuple[float, float, list[models.Model]]:
     """
     Performs cross-validation on a `model` using the `features` and `target` provided.
@@ -107,10 +108,10 @@ def cv_evaluation(  # pylint: disable=too-many-locals, too-many-arguments
 
         # Evaluation
         train_mse = model.evaluate(
-            features.iloc[train_indices], target.iloc[train_indices]
+            features.iloc[train_indices], target.iloc[train_indices], **kwargs
         )
         test_mse = model.evaluate(
-            features.iloc[test_indices], target.iloc[test_indices]
+            features.iloc[test_indices], target.iloc[test_indices], **kwargs
         )
         squared_errors[fold_number] = train_mse, test_mse
 
