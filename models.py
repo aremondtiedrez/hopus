@@ -28,11 +28,11 @@ class Model(ABC):
     def predict(self, features, **kwargs):
         """Returns a prediction obtained by mapping the features through the model."""
 
-    def evaluate(self, features, target):
+    def evaluate(self, features, target, **kwargs):
         """
         Computes the mean squared error between the true target an
         the predictions made by the model from the features."""
-        predictions = self.predict(features)
+        predictions = self.predict(features, **kwargs)
         return mean_squared_error(target, predictions)
 
     @abstractmethod
