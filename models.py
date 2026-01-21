@@ -6,6 +6,7 @@ from abc import ABC, abstractmethod
 from sklearn.linear_model import LinearRegression as _LinearRegression
 from sklearn.metrics import mean_squared_error
 
+import numpy as np
 import pandas as pd
 
 from xgboost import XGBRegressor as _XGBRegressor
@@ -35,11 +36,11 @@ class Model(ABC):
         return mean_squared_error(target, predictions)
 
     @abstractmethod
-    def save(self, filepath: str):
+    def save(self, filename: str):
         """Save the model."""
 
     @abstractmethod
-    def load(self, filepath: str):
+    def load(self, filename: str):
         """Load the model."""
 
 
@@ -105,21 +106,25 @@ class Baseline(Model):
         )
         return merged_features["predictedPrice"]
 
-    def save(self, filepath: str):
+    def save(self, filename: str):
         """
         Save the model by saving the means, over each ZIP code, of the time-normalized
         price-per-square-foot. Since that data is stored internally as a `pandas`
         `DataFramed` it is saved as a `csv` file.
-        """
-        self._zipcode_averages.to_csv(filepath)
 
-    def load(self, filepath: str):
+        The filename should NOT include the `.csv` extension.
+        """
+        self._zipcode_averages.to_csv(filename + ".csv")
+
+    def load(self, filename: str):
         """
         Load the model by loading the means, over each ZIP code, of the time-normalized
         price-per-square-foot. That data is expected to be stored externally as a `csv`
         file and is then loaded and stored internally as a `pandas` `DataFrame`.
+
+        The filename should NOT include the `.csv` extension.
         """
-        self._zipcode_averages = pd.read_csv(filepath)
+        self._zipcode_averages = pd.read_csv(filename + ".csv")
 
 
 class LinearRegression(Model):
@@ -144,6 +149,30 @@ class LinearRegression(Model):
     def predict(self, features):
         """Returns a prediction obtained by mapping the features through the model."""
         return self._model.predict(features)
+
+    def save(self, filename: str):
+        """
+        Save the model by saving the parameters (the coefficients and the intercept)
+        as `numpy` arrays.
+
+        The filename should NOT include the `.npz` extension.
+        """
+        np.savez(
+            filename + ".npz",
+            coefficients=self._model.coef_,
+            intercept=self._model.intercept,
+        )
+
+    def load(self, filename: str):
+        """
+        Load the model by loading its parameters (the coefficients and the intercept)
+        which are expected to be stored as numpy arrays in a single `npz` file.
+
+        The filename should NOT include the `.npz` extension.
+        """
+        parameters = np.load(filename + ".npz")
+        self._model.coef_ = parameters["coefficients"]
+        self._model.intercept = parameters["intercept"]
 
 
 class BoostedTrees(Model):
