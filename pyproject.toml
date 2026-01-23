@@ -27,6 +27,6 @@ include = ["hopus*"]
 [tool.setuptools.package-data]
 hopus = [
     "config/*.csv",
-    "demo_data/*.csv",
-    "demo_data/*.json",
+    "demo/*.csv",
+    "demo/*.json",
 ]
