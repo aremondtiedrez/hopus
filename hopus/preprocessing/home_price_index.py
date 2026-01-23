@@ -2,14 +2,19 @@
 This module contains the methods used to load and pre-process the home price index data.
 """
 
+from importlib import resources
+
 import pandas as pd
 
 
-def load(path: str = "data/CSUSHPINSA.csv") -> pd.DataFrame:
+def load_demo_data(path: str = None) -> pd.DataFrame:
     """
     Load the raw home price index data from a `csv` file
     into a `pandas` `DataFrame`.
     """
+    if path is None:
+        demo_data_path = resources.files("hopus").joinpath("demo_data/CSUSHPINSA.csv")
+        path = demo_data_path
     return pd.read_csv(path)
 
 
