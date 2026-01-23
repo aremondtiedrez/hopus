@@ -28,4 +28,5 @@ include = ["hopus*"]
 hopus = [
     "config/*.csv",
     "demo_data/*.csv",
+    "demo_data/*.json",
 ]

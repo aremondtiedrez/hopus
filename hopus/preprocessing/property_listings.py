@@ -4,15 +4,20 @@ obtained via the `properties` endpoints of the RentCast API
 (see https://developers.rentcast.io/reference/property-data).
 """
 
+from importlib import resources
+
 import numpy as np
 import pandas as pd
 
 
-def load(path: str = "data/data_v1.json") -> pd.DataFrame:
+def load_demo_data(path: str = "data/data_v1.json") -> pd.DataFrame:
     """
     Load the raw property listings data from the `json` file obtained from the RentCast
     API into a `pandas` `DataFrame`.
     """
+    if path is None:
+        demo_data_path = resources.files("hopus").joinpath("demo_data/data_v1.json")
+        path = demo_data_path
     return pd.read_json(path)
 
 
