@@ -9,7 +9,7 @@ from sklearn.model_selection import KFold
 import numpy as np
 import pandas as pd
 
-import models
+from . import models
 
 
 def hpi_mse(property_listings: pd.DataFrame, target: str = "price") -> float:
