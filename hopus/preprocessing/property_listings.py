@@ -16,8 +16,7 @@ def load_demo_data(path: str = None) -> pd.DataFrame:
     API into a `pandas` `DataFrame`.
     """
     if path is None:
-        demo_data_path = resources.files("hopus").joinpath("demo_data/data_v1.json")
-        path = demo_data_path
+        path = resources.files("hopus").joinpath("demo_data/data_v1.json")
     return pd.read_json(path)
 
 
@@ -116,7 +115,7 @@ def drop_outliers(data: pd.DataFrame, cutoff: tuple[float, float] = (0.2, 2.0)) 
 
 
 def drop_missing_key_features(
-    data: pd.DataFrame, column_to_group_map_path: str = "config/column_to_group_map.csv"
+    data: pd.DataFrame, column_to_group_map_path: str = None
 ) -> None:
     """
     We use an external `csv` file to label certain columns as *key* prediction features.
@@ -124,6 +123,11 @@ def drop_missing_key_features(
 
     This is done inplace and the index is reset after the rows are dropped.
     """
+    if column_to_group_map_path is None:
+        column_to_group_map_path = resources.files("hopus").joinpath(
+            "config/column_to_group_map.csv"
+        )
+
     column_to_group_map = pd.read_csv(column_to_group_map_path)
     column_to_group_map = dict(
         zip(column_to_group_map["Key"], column_to_group_map["Value"])
