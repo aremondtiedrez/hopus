@@ -12,13 +12,13 @@ from .. import models
 def load_training_data() -> pd.DataFrame:
     """Load the demo training data as a `pandas` `DataFrame`."""
     path = resources.files("hopus").joinpath("demo/training_data.csv")
-    return pd.read_csv(path, index_col=0)
+    return pd.read_csv(path)
 
 
 def load_test_data() -> pd.DataFrame:
     """Load the demo test data as a `pandas` `DataFrame`."""
     path = resources.files("hopus").joinpath("demo/test_data.csv")
-    return pd.read_csv(path, index_col=0)
+    return pd.read_csv(path)
 
 
 def load_trained_model(kind: str = "BoostedTrees") -> models.Model:
