@@ -122,20 +122,16 @@ class Baseline(Model):
         Save the model by saving the means, over each ZIP code, of the time-normalized
         price-per-square-foot. Since that data is stored internally as a `pandas`
         `DataFramed` it is saved as a `csv` file.
-
-        The filename should NOT include the `.csv` extension.
         """
-        self._zipcode_averages.to_csv(filename + ".csv")
+        self._zipcode_averages.to_csv(filename)
 
     def load(self, filename: str):
         """
         Load the model by loading the means, over each ZIP code, of the time-normalized
         price-per-square-foot. That data is expected to be stored externally as a `csv`
         file and is then loaded and stored internally as a `pandas` `DataFrame`.
-
-        The filename should NOT include the `.csv` extension.
         """
-        self._zipcode_averages = pd.read_csv(filename + ".csv")
+        self._zipcode_averages = pd.read_csv(filename)
 
 
 class LinearRegression(Model):
@@ -165,11 +161,9 @@ class LinearRegression(Model):
         """
         Save the model by saving the parameters (the coefficients and the intercept)
         as `numpy` arrays.
-
-        The filename should NOT include the `.npz` extension.
         """
         np.savez(
-            filename + ".npz",
+            filename,
             coefficients=self._model.coef_,
             intercept=self._model.intercept_,
         )
@@ -178,10 +172,8 @@ class LinearRegression(Model):
         """
         Load the model by loading its parameters (the coefficients and the intercept)
         which are expected to be stored as numpy arrays in a single `npz` file.
-
-        The filename should NOT include the `.npz` extension.
         """
-        parameters = np.load(filename + ".npz")
+        parameters = np.load(filename)
         self._model.coef_ = parameters["coefficients"]
         self._model.intercept = parameters["intercept"]
 
@@ -207,15 +199,11 @@ class BoostedTrees(Model):
     def save(self, filename: str):
         """
         Save the model by using the built-in save function from `xgboost`.
-
-        The filename should NOT include the `.model` extension.
         """
-        self._model.save_model(filename + ".model")
+        self._model.save_model(filename)
 
     def load(self, filename: str):
         """
         Load the model by using the built-in load function from `xgboost`.
-
-        The filename should NOT include the `.model` extension.
         """
-        self._model.load_model(filename + ".model")
+        self._model.load_model(filename)
