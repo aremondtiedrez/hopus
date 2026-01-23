@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Leaflet Map with CSV Data</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
+  <style>
+    body { margin: 0; padding: 0; }
+    #map { height: 100vh; width: 100vw; }
+  </style>
+</head>
+<body>
+  <div id="map"></div>
+
+  <script>
+    // Sample CSV data with locations
+    const csvData = `name,lat,lng,description
+London,51.505,-0.09,"Capital of the United Kingdom"
+Paris,48.8566,2.3522,"Capital of France"
+Berlin,52.52,13.405,"Capital of Germany"
+Madrid,40.4168,-3.7038,"Capital of Spain"
+Rome,41.9028,12.4964,"Capital of Italy"`;
+
+    // Initialize map centered on Europe
+    const map = L.map('map').setView([48.5, 5.0], 5);
+
+    // Add OpenStreetMap tiles
+    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19,
+      attribution: '© OpenStreetMap contributors'
+    }).addTo(map);
+
+    // Parse CSV and add markers
+    Papa.parse(csvData, {
+      header: true,
+      dynamicTyping: true,
+      skipEmptyLines: true,
+      complete: function(results) {
+        results.data.forEach(function(row) {
+          const marker = L.marker([row.lat, row.lng]).addTo(map);
+          marker.bindPopup(`<b>${row.name}</b><br>${row.description}`);
+        });
+      }
+    });
+  </script>
+</body>
+</html>
