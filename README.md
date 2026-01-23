@@ -15,7 +15,7 @@ This notebook leverages HOPUS utilities to
 
 The model obtained is used to display geographically
 its predictions side-by-side with the true prices
-on this interactive [map](https://aremondtiedrez.github.io/hopus/predictions_map.html).
+on this [interactive map](https://aremondtiedrez.github.io/hopus/predictions_map.html).
 
 ## Where does the data come from?
 
