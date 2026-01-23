@@ -143,10 +143,7 @@ def drop_missing_key_features(
     _reset_index_after_dropping_rows(data)
 
 
-def group_columns(
-    data: pd.DataFrame,
-    column_to_group_map_path: str = "config/column_to_group_map.csv",
-) -> None:
+def group_columns(data: pd.DataFrame, column_to_group_map_path: str = None) -> None:
     """
     Group the property listings data columns into four categories:
     - `identification` (e.g. the address, ZIP code, etc.),
@@ -162,6 +159,10 @@ def group_columns(
 
     This is done in-place.
     """
+    if column_to_group_map_path is None:
+        column_to_group_map_path = resources.files("hopus").joinpath(
+            "config/column_to_group_map.csv"
+        )
 
     # Build the multi_index_map
     column_to_group_map = pd.read_csv(column_to_group_map_path)
