@@ -13,10 +13,9 @@ This notebook leverages HOPUS utilities to
 - evaluate the performance of these models, and
 - display the model predictions on a geographical map.
 
-(Temporary note: the ***old*** showcase notebook may be found
-[here](
-https://colab.research.google.com/github/aremondtiedrez/hopus/blob/main/showcase.ipynb
-).)
+The model obtained is used to display geographically
+its predictions side-by-side with the true prices
+on this interactive [map](https://aremondtiedrez.github.io/hopus/predictions_map.html).
 
 ## Where does the data come from?
 
