@@ -3,7 +3,7 @@
 **HOusing Pricing UtilitieS (HOPUS)**: this repository contains utilities for the prediction
 of real estate listings sales prices.
 
-## >>> Start here! <<<
+## \>\>\> Start here! \<\<\<
 The easiest way to see what HOPUS can do is to peruse this [notebook](
 https://colab.research.google.com/github/aremondtiedrez/hopus/blob/main/demo.ipynb
 ) (via Google Colab).
