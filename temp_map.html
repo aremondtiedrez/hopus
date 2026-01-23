@@ -37,7 +37,7 @@
       complete: function(results) {
         results.data.forEach(function(row) {
           const marker = L.marker([row.latitude, row.longitude]).addTo(map);
-          marker.bindPopup(`<b>Predicted price:</b><br>${row.predictedPrice}`);
+	  marker.bindPopup(`<b>${row.addressLine1}</b><br>Predicted price: ${row.predictedPrice}<br>True price: ${row.truePrice}`);
         });
       },
       error: function(error) {
