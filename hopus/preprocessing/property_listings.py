@@ -16,7 +16,7 @@ def load_demo_data(path: str = None) -> pd.DataFrame:
     API into a `pandas` `DataFrame`.
     """
     if path is None:
-        path = resources.files("hopus").joinpath("demo_data/data_v1.json")
+        path = resources.files("hopus").joinpath("demo/data_v1.json")
     return pd.read_json(path)
 
 

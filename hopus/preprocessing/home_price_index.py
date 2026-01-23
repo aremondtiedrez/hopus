@@ -13,7 +13,7 @@ def load_demo_data(path: str = None) -> pd.DataFrame:
     into a `pandas` `DataFrame`.
     """
     if path is None:
-        path = resources.files("hopus").joinpath("demo_data/CSUSHPINSA.csv")
+        path = resources.files("hopus").joinpath("demo/CSUSHPINSA.csv")
     return pd.read_csv(path)
 
 
