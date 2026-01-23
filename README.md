@@ -5,7 +5,7 @@ of real estate listings sales prices.
 
 ## >>> Start here! <<<
 The easiest way to see what HOPUS can do is to peruse this [notebook](
-https://colab.research.google.com/github/aremondtiedrez/hopus/blob/main/demo/demo.ipynb
+https://colab.research.google.com/github/aremondtiedrez/hopus/blob/main/demo.ipynb
 ) (via Google Colab).
 This notebook leverages HOPUS utilities to
 - clean the raw data,
