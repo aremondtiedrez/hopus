@@ -10,7 +10,7 @@ import numpy as np
 import pandas as pd
 
 
-def load_demo_data(path: str = "data/data_v1.json") -> pd.DataFrame:
+def load_demo_data(path: str = None) -> pd.DataFrame:
     """
     Load the raw property listings data from the `json` file obtained from the RentCast
     API into a `pandas` `DataFrame`.
