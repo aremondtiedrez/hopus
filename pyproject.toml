@@ -29,6 +29,5 @@ hopus = [
     "config/*.csv",
     "demo/*.csv",
     "demo/*.json",
-    "demo/*.model",
     "demo/*.npz",
 ]
