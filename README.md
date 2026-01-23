@@ -5,13 +5,18 @@ of real estate listings sales prices.
 
 ## >>> Start here! <<<
 The easiest way to see what HOPUS can do is to peruse this [notebook](
-	https://colab.research.google.com/github/aremondtiedrez/hopus/blob/main/showcase.ipynb
+https://colab.research.google.com/github/aremondtiedrez/hopus/blob/main/demo/demo.ipynb
 ) (via Google Colab).
 This notebook leverages HOPUS utilities to
 - clean the raw data,
-- perform exploratory analysis of the data,
-- train a variety of models for the prediction of real estate prices, and
-- evaluate the performance of these models.
+- train a variety of models for the prediction of real estate prices,
+- evaluate the performance of these models, and
+- display the model predictions on a geographical map.
+
+(Temporary note: the ***old*** showcase notebook may be found
+[here](
+https://colab.research.google.com/github/aremondtiedrez/hopus/blob/main/showcase.ipynb
+).)
 
 ## Where does the data come from?
 
